@@ -1,1 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Bolão</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #2c3e50; color: #fff; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh;}
+        .container { background: #34495e; max-width: 500px; width: 100%; padding: 30px; border-radius: 12px; }
+        h1 { text-align: center; color: #e74c3c; margin-bottom: 5px; }
+        h2 { font-size: 18px; margin-top: 30px; border-top: 1px solid #7f8c8d; padding-top: 20px; text-align: center; color: #fff; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border:none; font-size:15px; }
+        .placar-box { display: flex; align-items: center; gap: 10px; background: #2c3e50; padding: 15px; border-radius: 8px; margin-bottom: 20px;}
+        .placar-box input { width: 60px; text-align: center; font-weight: bold; margin:0;}
+        button { background: #e74c3c; color: white; font-weight: bold; cursor: pointer; }
+        button:hover { background: #c0392b; }
+        .btn-excluir { background: #c0392b; }
+        .btn-excluir:hover { background: #962d22; }
+        .msg { background: #2ecc71; color: #fff; padding: 10px; text-align:center; border-radius: 5px; margin-bottom: 20px; font-weight:bold;}
+        .erro { background: #e74c3c; color: #fff; padding: 10px; text-align:center; border-radius: 5px; margin-bottom: 20px; font-weight:bold;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Painel do Admin</h1>
+        
+        <!-- SE NÃO ESTIVER LOGADO, MOSTRA A TELA DE SENHA -->
+        {% if not admin_logado %}
+            <p style="text-align:center; margin-bottom:20px;">Digite a senha mestra para acessar.</p>
+            
+            {% if erro %}
+                <div class="erro">{{ erro }}</div>
+            {% endif %}
+            
+            <form method="POST">
+                <input type="hidden" name="acao" value="login_admin">
+                <input type="password" name="senha_admin" placeholder="Senha do Administrador" required>
+                <button type="submit">Entrar na Área Restrita</button>
+            </form>
+            
+        <!-- SE ESTIVER LOGADO, MOSTRA AS OPÇÕES -->
+        {% else %}
+            {% if mensagem %}
+                <div class="msg">{{ mensagem }}</div>
+            {% endif %}
 
+            <p style="text-align:center; margin-bottom:20px;">Insira o Placar Oficial do jogo.</p>
+            <form method="POST">
+                <input type="hidden" name="acao" value="lancar_resultado">
+                <div class="placar-box">
+                    <select name="time_a" required>
+                        <option value="">Mandante</option>
+                        <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
+                    </select>
+                    <input type="number" name="gols_a_real" min="0" required>
+                    <span>X</span>
+                    <input type="number" name="gols_b_real" min="0" required>
+                    <select name="time_b" required>
+                        <option value="">Visitante</option>
+                        <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
+                    </select>
+                </div>
+                <button type="submit">Lançar Resultado Oficial</button>
+            </form>
+            
+            <h2>🗑️ Gerenciar Usuários</h2>
+            <form method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                <input type="hidden" name="acao" value="excluir_usuario">
+                <select name="nome_usuario" required style="background: #2c3e50; color: white;">
+                    <option value="">Selecione o usuário...</option>
+                    {% for u in usuarios %}
+                        <option value="{{ u[0] }}">{{ u[0] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-excluir">Excluir Usuário e Palpites</button>
+            </form>
+            
+            <form method="POST" style="margin-top: 30px;">
+                <input type="hidden" name="acao" value="logout_admin">
+                <button type="submit" style="background: transparent; border: 1px solid #7f8c8d; color: #bdc3c7;">Sair do Painel Admin</button>
+            </form>
+        {% endif %}
+        
+        <p style="text-align:center; margin-top:20px;"><a href="/" style="color:#bdc3c7; text-decoration:none;">⬅ Voltar para o Bolão</a></p>
+    </div>
+</body>
+</html>
