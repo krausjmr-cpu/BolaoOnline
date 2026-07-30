@@ -1,1 +1,37 @@
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Bolão</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #1abc9c; margin-top:0; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size:15px; }
+        button { background: #1abc9c; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size:16px; cursor: pointer; margin-bottom: 10px;}
+        button:hover { background: #16a085; }
+        .btn-azul { background: #3498db; } .btn-azul:hover { background: #2980b9; }
+        .erro { background: #e74c3c; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Entrar no Bolão</h1>
+        
+        {% if erro %}
+            <div class="erro">{{ erro }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <input type="text" name="nome" placeholder="Digite seu Nome" required>
+            <input type="password" name="senha" placeholder="Crie ou digite sua Senha" required>
+            
+            <button type="submit" name="acao" value="entrar">Entrar</button>
+            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+            <p style="color:#777; font-size:14px; margin-top:0;">Primeira vez aqui?</p>
+            <button type="submit" name="acao" value="cadastrar" class="btn-azul">Criar minha Conta</button>
+        </form>
+    </div>
+</body>
+</html>
