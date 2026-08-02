@@ -1,5 +1,7 @@
 import sqlite3
-from flask import Flask, render_template, request, session, redirect, url_for
+import os
+from flask import Flask, render_template, request, session, redirect, url_for, send_file
+from fpdf import FPDF
 
 app = Flask(__name__)
 app.secret_key = 'chave_super_secreta_do_bolao'
@@ -112,18 +114,16 @@ def principal():
     
     return render_template('index.html', ranking=ranking, palpites=dados_banco, resultados=resultados, usuario_logado=session['usuario'])
 
-# --- PÁGINA DO ADMIN COM SENHA ---
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     mensagem = ""
     erro = ""
     
-    # 1. Verifica login e logout do Administrador
     if request.method == 'POST':
         acao = request.form.get('acao')
         if acao == 'login_admin':
             senha = request.form.get('senha_admin')
-            if senha == 'mestre123': # <-- SUA SENHA DO ADMIN AQUI
+            if senha == 'mestre123': 
                 session['admin_logado'] = True
             else:
                 erro = "Senha de administrador incorreta!"
@@ -131,11 +131,9 @@ def admin():
         elif acao == 'logout_admin':
             session.pop('admin_logado', None)
             
-    # 2. Se o Admin NÃO estiver logado, para por aqui e mostra só a tela de senha
     if not session.get('admin_logado'):
         return render_template('admin.html', admin_logado=False, erro=erro)
 
-    # 3. Se estiver logado, roda a lógica do painel normalmente
     conexao = sqlite3.connect('bolao.db')
     cursor = conexao.cursor()
     
@@ -148,6 +146,12 @@ def admin():
             cursor.execute('DELETE FROM palpites_oficiais WHERE nome = ?', (nome_usuario,))
             conexao.commit()
             mensagem = f"Usuário '{nome_usuario}' e seus palpites foram excluídos!"
+            
+        elif acao == 'excluir_palpite':
+            id_palpite = request.form.get('id_palpite')
+            cursor.execute('DELETE FROM palpites_oficiais WHERE id = ?', (id_palpite,))
+            conexao.commit()
+            mensagem = "Palpite apagado com sucesso!"
             
         elif acao == 'lancar_resultado':
             time_a = request.form.get('time_a')
@@ -186,9 +190,65 @@ def admin():
 
     cursor.execute('SELECT nome FROM usuarios ORDER BY nome')
     lista_usuarios = cursor.fetchall()
+    
+    cursor.execute('SELECT id, nome, time_a, gols_a, gols_b, time_b FROM palpites_oficiais ORDER BY id DESC')
+    lista_palpites = cursor.fetchall()
+    
     conexao.close()
     
-    return render_template('admin.html', admin_logado=True, mensagem=mensagem, usuarios=lista_usuarios)
+    return render_template('admin.html', admin_logado=True, mensagem=mensagem, usuarios=lista_usuarios, palpites=lista_palpites)
+
+@app.route('/usuario/<nome>')
+def ver_usuario(nome):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+        
+    conexao = sqlite3.connect('bolao.db')
+    cursor = conexao.cursor()
+    
+    cursor.execute('SELECT pontos FROM usuarios WHERE nome = ?', (nome,))
+    resultado = cursor.fetchone()
+    pontos = resultado[0] if resultado else 0
+    
+    cursor.execute('SELECT time_a, gols_a, gols_b, time_b, status FROM palpites_oficiais WHERE nome = ? ORDER BY id DESC', (nome,))
+    palpites = cursor.fetchall()
+    conexao.close()
+    
+    return render_template('usuario.html', nome=nome, pontos=pontos, palpites=palpites)
+
+@app.route('/baixar_pdf/<nome>')
+def baixar_pdf(nome):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+        
+    conexao = sqlite3.connect('bolao.db')
+    cursor = conexao.cursor()
+    cursor.execute('SELECT time_a, gols_a, gols_b, time_b, status FROM palpites_oficiais WHERE nome = ? ORDER BY id DESC', (nome,))
+    palpites = cursor.fetchall()
+    conexao.close()
+
+    pdf = FPDF()
+    pdf.add_page()
+    
+    pdf.set_font("helvetica", style="B", size=18)
+    pdf.cell(200, 10, txt=f"Bolao - Palpites de {nome}", new_x="LMARGIN", new_y="NEXT", align='C')
+    pdf.ln(10)
+
+    pdf.set_font("helvetica", style="B", size=12)
+    pdf.cell(140, 10, txt="Jogo", border=1, align='C')
+    pdf.cell(50, 10, txt="Status", border=1, new_x="LMARGIN", new_y="NEXT", align='C')
+
+    pdf.set_font("helvetica", size=12)
+    for p in palpites:
+        jogo = f"{p[0]} {p[1]} X {p[2]} {p[3]}"
+        status = p[4]
+        pdf.cell(140, 10, txt=jogo, border=1, align='C')
+        pdf.cell(50, 10, txt=status, border=1, new_x="LMARGIN", new_y="NEXT", align='C')
+
+    nome_arquivo = f"palpites_{nome}.pdf"
+    pdf.output(nome_arquivo)
+    
+    return send_file(nome_arquivo, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
