@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Palpites de {{ nome }}</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #ecf0f1; color: #2c3e50; padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { background: #fff; max-width: 800px; width: 100%; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header-perfil { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ecf0f1; padding-bottom: 20px; margin-bottom: 20px; }
+        h1 { margin: 0; color: #2980b9; }
+        .pontos-badge { background: #f1c40f; color: #2c3e50; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background-color: #2980b9; color: white; }
+        .btn-pdf { display: inline-block; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        .btn-pdf:hover { background: #c0392b; }
+        .btn-voltar { display: inline-block; margin-top: 20px; color: #7f8c8d; text-decoration: none; margin-right: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-perfil">
+            <h1>Palpites de {{ nome }}</h1>
+            <div class="pontos-badge">🏆 {{ pontos }} pts</div>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Jogo</th>
+                <th>Status</th>
+            </tr>
+            {% for p in palpites %}
+            <tr>
+                <td><strong>{{ p[0] }}</strong> {{ p[1] }} x {{ p[2] }} <strong>{{ p[3] }}</strong></td>
+                <td style="color: {% if p[4] and 'pts' in p[4] %}#27ae60{% else %}#7f8c8d{% endif %}; font-weight: bold;">
+                    {{ p[4] }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">Nenhum palpite registrado ainda.</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" class="btn-voltar">⬅ Voltar para o Bolão</a>
+            {% if palpites %}
+                <a href="/baixar_pdf/{{ nome }}" class="btn-pdf">📄 Baixar Relatório em PDF</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
