@@ -2,96 +2,135 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Bolão Brasileirão</title>
+    <title>Bolão do Brasileirão</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #eef2f3; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: #fff; max-width: 600px; width: 100%; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1, h2 { text-align: center; color: #1abc9c; margin-bottom: 15px; }
-        .box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
-        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
-        input[type="number"], select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size:15px;}
-        .placar-box { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .placar-box input { width: 60px; text-align: center; font-weight: bold; }
-        button { background: #1abc9c; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size:16px; cursor: pointer; }
-        button:hover { background: #16a085; }
-        .ranking-lista { background: #fff3cd; border-left: 5px solid #ffc107; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: bold;}
-        .palpite-lista { background: #e8f8f5; border-left: 5px solid #1abc9c; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items:center; font-size: 14px;}
-        .resultado-lista { background: #eaf2f8; border-left: 5px solid #3498db; padding: 12px; margin-bottom: 8px; border-radius: 6px; text-align: center; font-size: 16px;}
-        .status { font-weight:bold; color: #e67e22; background: #fdf2e9; padding: 4px 8px; border-radius:4px; font-size:12px;}
-        .cabecalho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #2c3e50; padding: 15px; border-radius: 8px; color: white;}
-        .cabecalho a { color: #e74c3c; font-weight: bold; text-decoration: none; background: white; padding: 5px 10px; border-radius: 4px;}
+        body { background: #ecf0f1; color: #2c3e50; padding: 20px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #2980b9; color: white; padding: 15px 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header a { color: white; text-decoration: none; font-weight: bold; background: #c0392b; padding: 8px 15px; border-radius: 5px; }
+        .container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        .coluna-principal { flex: 2; min-width: 300px; }
+        .coluna-lateral { flex: 1; min-width: 250px; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { color: #2980b9; margin-top: 0; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background-color: #2980b9; color: white; }
+        input, select, button { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #bdc3c7; border-radius: 5px; }
+        .placar-form { display: flex; align-items: center; gap: 10px; }
+        .placar-form input[type="number"] { width: 60px; text-align: center; font-weight: bold; font-size: 16px; margin: 0; }
+        button { background: #27ae60; color: white; font-weight: bold; cursor: pointer; border: none; font-size: 16px; margin-top: 10px; }
+        button:hover { background: #2ecc71; }
+        .btn-palpites { background: #3498db; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 13px; display: inline-block; }
+        .btn-palpites:hover { background: #2980b9; }
+        .link-admin { display: block; text-align: center; margin-top: 20px; color: #7f8c8d; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        
-        <!-- BARRA DO USUÁRIO LOGADO -->
-        <div class="cabecalho">
-            <span>👤 Olá, <strong>{{ usuario_logado }}</strong>!</span>
+
+    <div class="header" style="max-width: 1200px; margin: 0 auto 20px auto;">
+        <h1>⚽ Bolão do Brasileirão</h1>
+        <div>
+            <span style="margin-right: 15px;">Olá, <strong>{{ usuario_logado }}</strong>!</span>
             <a href="/sair">Sair</a>
         </div>
+    </div>
 
-        <h1>🏆 Bolão Brasileirão</h1>
+    <div class="container">
+        <!-- COLUNA ESQUERDA (Palpites e Jogos) -->
+        <div class="coluna-principal">
+            
+            <div class="box">
+                <h2>📝 Fazer Novo Palpite</h2>
+                <form method="POST">
+                    <input type="hidden" name="acao" value="novo_palpite">
+                    <div class="placar-form">
+                        <select name="time_a" required>
+                            <option value="">Mandante</option>
+                            <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
+                        </select>
+                        <input type="number" name="gols_time_a" min="0" required>
+                        <span style="font-weight: bold;">X</span>
+                        <input type="number" name="gols_time_b" min="0" required>
+                        <select name="time_b" required>
+                            <option value="">Visitante</option>
+                            <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
+                        </select>
+                    </div>
+                    <button type="submit">Salvar Palpite</button>
+                </form>
+            </div>
+
+            <div class="box">
+                <h2>🎯 Últimos Palpites da Galera</h2>
+                <table>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Jogo</th>
+                        <th>Placar</th>
+                        <th>Status/Pontos</th>
+                    </tr>
+                    {% for p in palpites %}
+                    <tr>
+                        <td><strong>{{ p[0] }}</strong></td>
+                        <td>{{ p[1] }} x {{ p[4] }}</td>
+                        <td><strong>{{ p[2] }} - {{ p[3] }}</strong></td>
+                        <td style="color: {% if p[5] and 'pts' in p[5] %}#27ae60{% else %}#7f8c8d{% endif %}; font-weight: bold;">
+                            {{ p[5] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div class="box">
+                <h2>✅ Resultados Oficiais</h2>
+                <table>
+                    <tr>
+                        <th>Mandante</th>
+                        <th>Placar</th>
+                        <th>Visitante</th>
+                    </tr>
+                    {% for r in resultados %}
+                    <tr>
+                        <td>{{ r[0] }}</td>
+                        <td><strong>{{ r[1] }} - {{ r[2] }}</strong></td>
+                        <td>{{ r[3] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA (Ranking) -->
+        <div class="coluna-lateral">
+            <div class="box">
+                <h2>🏆 Ranking Geral</h2>
+                <table>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Nome</th>
+                        <th>Pts</th>
+                        <th>Ações</th>
+                    </tr>
+                    {% for u in ranking %}
+                    <tr>
+                        <td>{{ loop.index }}º</td>
+                        <td><strong>{{ u[0] }}</strong></td>
+                        <td>{{ u[1] }}</td>
+                        <td>
+                            <a href="/usuario/{{ u[0] }}" class="btn-palpites">Ver Palpites</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            
+            <a href="/admin" class="link-admin">⚙️ Área do Administrador</a>
+        </div>
         
-        <div class="box">
-            <h2>Classificação Geral</h2>
-            {% for r in ranking %}
-                <div class="ranking-lista">
-                    <span>{{ loop.index }}º {{ r[0] }}</span>
-                    <span>{{ r[1] }} pts</span>
-                </div>
-            {% else %}
-                <p style="text-align:center;">Nenhum participante ainda.</p>
-            {% endfor %}
-        </div>
-
-        <div class="box">
-            <h2 style="color: #3498db;">Resultados Oficiais</h2>
-            {% for r in resultados %}
-                <div class="resultado-lista">
-                    <strong>{{ r[0] }}</strong> {{ r[1] }} x {{ r[2] }} <strong>{{ r[3] }}</strong>
-                </div>
-            {% else %}
-                <p style="text-align:center; color: #777;">Nenhum jogo finalizado ainda.</p>
-            {% endfor %}
-        </div>
-
-        <!-- FORMULÁRIO DE PALPITE (AGORA PEGA O NOME AUTOMATICAMENTE) -->
-        <div class="box">
-            <h2>Faça seu Palpite</h2>
-            <form method="POST">
-                <input type="hidden" name="acao" value="novo_palpite">
-                
-                <label>Qual vai ser o placar?</label>
-                <div class="placar-box">
-                    <select name="time_a" required>
-                        <option value="">Mandante</option>
-                        <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
-                    </select>
-                    <input type="number" name="gols_time_a" min="0" required>
-                    <span>X</span>
-                    <input type="number" name="gols_time_b" min="0" required>
-                    <select name="time_b" required>
-                        <option value="">Visitante</option>
-                        <option value="Athletico-PR">Athletico-PR</option><option value="Atlético-MG">Atlético-MG</option><option value="Bahia">Bahia</option><option value="Botafogo">Botafogo</option><option value="Chapecoense">Chapecoense</option><option value="Corinthians">Corinthians</option><option value="Coritiba">Coritiba</option><option value="Cruzeiro">Cruzeiro</option><option value="Cuiabá">Cuiabá</option><option value="Flamengo">Flamengo</option><option value="Fluminense">Fluminense</option><option value="Grêmio">Grêmio</option><option value="Internacional">Internacional</option><option value="Juventude">Juventude</option><option value="Palmeiras">Palmeiras</option><option value="Red Bull Bragantino">RB Bragantino</option><option value="Remo">Remo</option><option value="São Paulo">São Paulo</option><option value="Vasco">Vasco</option><option value="Vitória">Vitória</option>
-                    </select>
-                </div>
-                <button type="submit">Enviar Palpite</button>
-            </form>
-        </div>
-
-        <div class="box">
-            <h2>Últimos Palpites</h2>
-            {% for p in palpites %}
-                <div class="palpite-lista">
-                    <span><strong>{{ p[0] }}</strong>: {{ p[1] }} {{ p[2] }} x {{ p[3] }} {{ p[4] }}</span>
-                    <span class="status">{{ p[5] }}</span>
-                </div>
-            {% endfor %}
-        </div>
-        
-        <p style="text-align:center; margin-top:10px;"><a href="/admin" style="color:#95a5a6; text-decoration:none;">⚙️ Área do Admin</a></p>
     </div>
 </body>
 </html>
